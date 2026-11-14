@@ -10,26 +10,34 @@ export const AFTER_SIGN_OUT_URL = SIGN_IN_URL;
 
 const PROTECTED_PAGE_PREFIXES = ["/dashboard"] as const;
 
-const OWNER_API_PREFIXES = [
-  "/api/projects",
-  "/api/knowledge",
-  "/api/conversations",
+// Every /api route needs a session unless it is listed here (deny by default),
+// so a new owner route is never public by accident.
+const PUBLIC_API_PREFIXES = [
+  "/api/widget",
+  "/api/clerk/webhook",
+  "/api/posthog-config",
 ] as const;
 
-// Mirrors the `/prefix(.*)` patterns in the task: the prefix itself and
-// anything after it.
-function startsWithAny(pathname: string, prefixes: readonly string[]): boolean {
-  return prefixes.some((prefix) => pathname.startsWith(prefix));
+/**
+ * True when `pathname` is `prefix` itself or a path below it. Matches whole
+ * segments, so `/api/widget` covers `/api/widget/chat` but not `/api/widgetx`.
+ */
+export function matchesSegmentPrefix(pathname: string, prefix: string): boolean {
+  return pathname === prefix || pathname.startsWith(`${prefix}/`);
+}
+
+function matchesAny(pathname: string, prefixes: readonly string[]): boolean {
+  return prefixes.some((prefix) => matchesSegmentPrefix(pathname, prefix));
 }
 
 /** Owner pages: signed-out visitors are redirected to sign-in. */
 export function isProtectedPage(pathname: string): boolean {
-  return startsWithAny(pathname, PROTECTED_PAGE_PREFIXES);
+  return matchesAny(pathname, PROTECTED_PAGE_PREFIXES);
 }
 
-/** Owner API routes: signed-out requests get a 401 JSON error. */
+/** Owner API routes (every /api path not on the public list): signed-out requests get a 401. */
 export function isOwnerApiRoute(pathname: string): boolean {
-  return startsWithAny(pathname, OWNER_API_PREFIXES);
+  return matchesSegmentPrefix(pathname, "/api") && !matchesAny(pathname, PUBLIC_API_PREFIXES);
 }
 
 /** True for any path that needs a Clerk session. */

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { isOwnerApiRoute, isProtectedPage, isProtectedRoute } from "./routes";
+import {
+  isOwnerApiRoute,
+  isProtectedPage,
+  isProtectedRoute,
+  matchesSegmentPrefix,
+} from "./routes";
 
 const PUBLIC_PATHS = [
   "/",
@@ -9,15 +14,18 @@ const PUBLIC_PATHS = [
   "/sign-up/verify-email-address",
   "/embed",
   "/embed/abc123",
+  "/api/widget",
   "/api/widget/config",
   "/api/widget/chat",
   "/api/clerk/webhook",
   "/api/posthog-config",
+  "/dashboardx",
 ];
 
 const PROTECTED_PAGES = ["/dashboard", "/dashboard/", "/dashboard/projects/123"];
 
 const OWNER_API_PATHS = [
+  "/api",
   "/api/projects",
   "/api/projects/123",
   "/api/projects/123/knowledge",
@@ -26,6 +34,15 @@ const OWNER_API_PATHS = [
   "/api/projects/123/conversations",
   "/api/knowledge/456",
   "/api/conversations/789",
+  // Deny by default: unknown /api routes need a session
+  "/api/anything",
+  "/api/account/usage",
+  // Whole-segment match: look-alikes of public routes are not public
+  "/api/widgetx",
+  "/api/widgetfoo/chat",
+  "/api/clerk",
+  "/api/clerk/webhookx",
+  "/api/posthog-configx",
 ];
 
 describe("route protection", () => {
@@ -43,5 +60,16 @@ describe("route protection", () => {
     expect(isOwnerApiRoute(path)).toBe(true);
     expect(isProtectedPage(path)).toBe(false);
     expect(isProtectedRoute(path)).toBe(true);
+  });
+});
+
+describe("matchesSegmentPrefix", () => {
+  it("matches the prefix and paths below it", () => {
+    expect(matchesSegmentPrefix("/api/widget", "/api/widget")).toBe(true);
+    expect(matchesSegmentPrefix("/api/widget/chat", "/api/widget")).toBe(true);
+  });
+
+  it("does not match a longer segment", () => {
+    expect(matchesSegmentPrefix("/api/widgetx", "/api/widget")).toBe(false);
   });
 });
