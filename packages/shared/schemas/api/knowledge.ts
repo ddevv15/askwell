@@ -7,7 +7,7 @@ import {
   MAX_KNOWLEDGE_TEXT_LENGTH,
   MAX_KNOWLEDGE_TITLE_LENGTH,
   knowledgeFileTypeFromName,
-} from "../limits";
+} from "../../limits";
 import { idSchema, timestampSchema } from "./common";
 
 export const knowledgeSourceSchema = z.object({

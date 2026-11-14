@@ -1,5 +1,4 @@
-// Error shape for every API route: { error: { code, message } } (CLAUDE.md).
-import { z } from "zod";
+// Error shape for every API route: { error: { code, message } } (CLAUDE.md). Zod-free.
 
 /** Every error code a route may return, with its HTTP status. */
 export const ERROR_STATUS = {
@@ -26,15 +25,10 @@ export const ERROR_STATUS = {
 
 export type ErrorCode = keyof typeof ERROR_STATUS;
 export const ERROR_CODES = Object.keys(ERROR_STATUS) as [ErrorCode, ...ErrorCode[]];
-export const errorCodeSchema = z.enum(ERROR_CODES);
 
-export const apiErrorSchema = z.object({
-  error: z.object({
-    code: errorCodeSchema,
-    message: z.string(),
-  }),
-});
-export type ApiError = z.infer<typeof apiErrorSchema>;
+export interface ApiError {
+  error: { code: ErrorCode; message: string };
+}
 
 /** Build the error body for a code. Pair with `ERROR_STATUS[code]` for the status. */
 export function apiError(code: ErrorCode, message: string): ApiError {

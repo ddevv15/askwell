@@ -1,6 +1,6 @@
 // Public routes, called by the widget from any origin (§8 Public).
 import { z } from "zod";
-import { MAX_MESSAGE_LENGTH, MAX_VISITOR_ID_LENGTH } from "../limits";
+import { MAX_MESSAGE_LENGTH, MAX_VISITOR_ID_LENGTH } from "../../limits";
 import { widgetConfigSchema } from "../widget";
 import { idSchema, publicKeySchema } from "./common";
 

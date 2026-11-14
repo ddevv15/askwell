@@ -1,6 +1,6 @@
 // Owner routes: projects CRUD and widget config (§8 Owner).
 import { z } from "zod";
-import { MAX_PROJECT_NAME_LENGTH } from "../limits";
+import { MAX_PROJECT_NAME_LENGTH } from "../../limits";
 import { widgetConfigSchema } from "../widget";
 import { idSchema, publicKeySchema, timestampSchema } from "./common";
 
